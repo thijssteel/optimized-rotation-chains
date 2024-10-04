@@ -1,4 +1,5 @@
 #include "immintrin.h"
+#include "stdio.h"
 
 #include "rotc.h"
 #include "kernels_avx2.h"
@@ -14,7 +15,7 @@ void pack_A_small(int m, int n, const double *A, int lda, double *A_packed)
 
     for (int j = 0; j < n; j++)
     {
-        for (int i = 0; i < m; i ++)
+        for (int i = 0; i < m; i++)
         {
             A_packed[i + j * mr] = A[i + j * lda];
         }
@@ -30,7 +31,7 @@ void unpack_A_small(int m, int n, const double *A_packed, double *A, int lda)
 
     for (int j = 0; j < n; j++)
     {
-        for (int i = 0; i < m; i ++)
+        for (int i = 0; i < m; i++)
         {
             A[i + j * lda] = A_packed[i + j * mr];
         }
@@ -106,12 +107,14 @@ void drotc_pipeline_block_right(int m, int n, int k, double *A, int lda, double 
         int g = k - 1;
         for (; p + (kr - 1) < k; p += kr, g -= kr)
         {
-            if(i == 0) pack_C_and_S_mr(n, &C[g + p * ldc], ldc, &S[g + p * lds], lds, &P[p * ldp]);
+            if (i == 0)
+                pack_C_and_S_mr(n, &C[g + p * ldc], ldc, &S[g + p * lds], lds, &P[p * ldp]);
             drotc_kernel_12xnx3(n, &Ap[i * ldap + (g - (kr - 1)) * mr], &P[p * ldp]);
         }
         for (; p < k; p += 1, g -= 1)
         {
-            if(i == 0) pack_C_and_S_small(n, &C[g + p * ldc], ldc, &S[g + p * lds], lds, &P[p * ldp]);
+            if (i == 0)
+                pack_C_and_S_small(n, &C[g + p * ldc], ldc, &S[g + p * lds], lds, &P[p * ldp]);
             drotc_kernel_12xnx1(n, &Ap[i * ldap + g * mr], &P[p * ldp]);
         }
 
@@ -119,52 +122,70 @@ void drotc_pipeline_block_right(int m, int n, int k, double *A, int lda, double 
     }
 }
 
-// void drotc(char side, char dir, bool startup, bool shutdown, int m, int n, int k, double *A, int lda, const double *C, int ldc, const double *S, int lds)
-// {
-//     const int mr = 12;
-//     const int kr = 3;
+void drotc(char side, char dir, bool startup, bool shutdown, int m, int n, int k, double *A, int lda, const double *C, int ldc, const double *S, int lds)
+{
 
-//     // Make sure that kb and mb are multiples of kr and mr respectively
-//     const int nb = 216;
-//     const int kb = 60;
-//     const int mb = 960;
+    if (side == 'L')
+    {
+        printf("Left rotation is not supported yet\n");
+        return;
+    }
 
-//     const int m_pack = (min(m, mb) + mr - 1) / mr * mr;
+    if (dir == 'B')
+    {
+        printf("Backward rotation is not supported yet\n");
+        return;
+    }
 
-//     double *A_pack =
-//         (double *)aligned_alloc(64, m_pack * n * sizeof(double));
+    if (startup)
+    {
+        printf("Startup rotation is not supported yet\n");
+        return;
+    }
 
-//     for (int ib = 0; ib < m; ib += mb)
-//     {
-//         int m2 = min(m - ib, mb);
+    if (shutdown)
+    {
+        printf("Shutdown rotation is not supported yet\n");
+        return;
+    }
 
-//         pack_A(m2, n, &A[ib], lda, A_pack);
+    const int mr = 12;
+    // const int kr = 3;
 
-//         for (int pb = 0; pb < k; pb += kb)
-//         {
-//             int k2 = min(k - pb, kb);
+    // Make sure that kb and mb are multiples of kr and mr respectively
+    const int nb = 216;
+    const int kb = 60;
+    const int mb = 960;
 
-//             // Startup
-//             rot_sequence_startup(m2, k2, A_pack, n, &C[pb * ldc], ldc,
-//                                  &S[pb * ldc], lds);
+    const int m_pack = (min(m, mb) + mr - 1) / mr * mr;
 
-//             // Pipeline phase
-//             for (int jb = 0; jb < n - k2; jb += nb)
-//             {
-//                 int n2 = min(n - k2 - jb, nb);
+    double *A_pack =
+        (double *)aligned_alloc(64, m_pack * (nb + kb) * sizeof(double));
 
-//                 rot_sequence_block(m2, n2, k2, &A_pack[jb * mr], n,
-//                                    &C[jb + pb * ldc], ldc,
-//                                    &S[jb + pb * ldc], lds);
-//             }
-//             // Shutdown
-//             rot_sequence_shutdown(m2, k2, &A_pack[(n - k2) * mr], n,
-//                                   &C[n - k2 + pb * ldc], ldc,
-//                                   &S[n - k2 + pb * ldc], lds);
-//         }
+    double *P = (double *)aligned_alloc(64, 2 * n * k * sizeof(double));
 
-//         unpack_A(m2, n, &A[ib], lda, A_pack);
-//     }
+    for (int ib = 0; ib < m; ib += mb)
+    {
+        int m2 = min(m - ib, mb);
 
-//     free(A_pack);
-// }
+        for (int jb = 0; jb < n - k; jb += nb)
+        {
+            int n2 = min(n - k - jb, nb);
+
+            for (int pb = 0; pb < k; pb += kb)
+            {
+                int k2 = min(k - pb, kb);
+
+                int gb = jb + k - 1 - pb;
+                int gb2 = gb - (k2 - 1);
+
+                drotc_pipeline_block_right(m2, n2, k2, &A[ib + gb2 * lda],
+                                           lda, A_pack, &C[gb2 + pb * ldc],
+                                           ldc, &S[gb2 + pb * lds], lds, P);
+            }
+        }
+    }
+
+    free(A_pack);
+    free(P);
+}
