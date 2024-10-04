@@ -1,0 +1,4 @@
+.vscode
+*.o
+
+test_kernels_avx2
