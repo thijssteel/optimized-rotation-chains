@@ -2,3 +2,4 @@
 *.o
 
 test_kernels_avx2
+test_block_avx2
