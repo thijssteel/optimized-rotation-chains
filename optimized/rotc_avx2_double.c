@@ -13,11 +13,25 @@ void pack_A_small(int m, int n, const double *A, int lda, double *A_packed)
 {
     const int mr = 12;
 
-    for (int j = 0; j < n; j++)
+    if (m == mr)
     {
-        for (int i = 0; i < m; i++)
+        for (int j = 0; j < n; j++)
         {
-            A_packed[i + j * mr] = A[i + j * lda];
+            for (int i = 0; i < mr; i += 4)
+            {
+                __m256d a = _mm256_loadu_pd(&A[i + j * lda]);
+                _mm256_storeu_pd(&A_packed[i + j * mr], a);
+            }
+        }
+    }
+    else
+    {
+        for (int j = 0; j < n; j++)
+        {
+            for (int i = 0; i < m; i++)
+            {
+                A_packed[i + j * mr] = A[i + j * lda];
+            }
         }
     }
 }
@@ -29,11 +43,26 @@ void unpack_A_small(int m, int n, const double *A_packed, double *A, int lda)
 {
     const int mr = 12;
 
-    for (int j = 0; j < n; j++)
+    if (m == mr)
     {
-        for (int i = 0; i < m; i++)
+        for (int j = 0; j < n; j++)
         {
-            A[i + j * lda] = A_packed[i + j * mr];
+            for (int i = 0; i < mr; i += 4)
+            {
+                __m256d a = _mm256_loadu_pd(&A_packed[i + j * mr]);
+                _mm256_storeu_pd(&A[i + j * lda], a);
+            }
+        }
+    }
+    else
+    {
+
+        for (int j = 0; j < n; j++)
+        {
+            for (int i = 0; i < m; i++)
+            {
+                A[i + j * lda] = A_packed[i + j * mr];
+            }
         }
     }
 }
