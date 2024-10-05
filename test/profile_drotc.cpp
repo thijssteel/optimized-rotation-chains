@@ -73,7 +73,10 @@ int main()
     std::cout << "profiling drotc" << std::endl;
     std::cout << "=================================" << std::endl;
 
-    profile_rotc<double>(1000, 1000, 180, drotc);
+    for(int n = 420; n <= 4000; n += 420)
+    {
+        profile_rotc<double>(n, n, 180, drotc);
+    }
 
     return 0;
 }

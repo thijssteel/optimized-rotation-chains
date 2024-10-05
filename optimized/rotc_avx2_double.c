@@ -17,11 +17,13 @@ void pack_A_small(int m, int n, const double *A, int lda, double *A_packed)
     {
         for (int j = 0; j < n; j++)
         {
-            for (int i = 0; i < mr; i += 4)
-            {
-                __m256d a = _mm256_loadu_pd(&A[i + j * lda]);
-                _mm256_storeu_pd(&A_packed[i + j * mr], a);
-            }
+            __m256d a1 = _mm256_loadu_pd(&A[j * lda]);
+            _mm256_storeu_pd(&A_packed[j * mr], a1);
+            __m256d a2 = _mm256_loadu_pd(&A[4 + j * lda]);
+            _mm256_storeu_pd(&A_packed[4 + j * mr], a2);
+            __m256d a3 = _mm256_loadu_pd(&A[8 + j * lda]);
+            _mm256_storeu_pd(&A_packed[8 + j * mr], a3);
+            _mm_prefetch(&A[(j + 1) * lda], _MM_HINT_T0);
         }
     }
     else
@@ -47,11 +49,12 @@ void unpack_A_small(int m, int n, const double *A_packed, double *A, int lda)
     {
         for (int j = 0; j < n; j++)
         {
-            for (int i = 0; i < mr; i += 4)
-            {
-                __m256d a = _mm256_loadu_pd(&A_packed[i + j * mr]);
-                _mm256_storeu_pd(&A[i + j * lda], a);
-            }
+            __m256d a1 = _mm256_loadu_pd(&A_packed[j * mr]);
+            _mm256_storeu_pd(&A[j * lda], a1);
+            __m256d a2 = _mm256_loadu_pd(&A_packed[4 + j * mr]);
+            _mm256_storeu_pd(&A[4 + j * lda], a2);
+            __m256d a3 = _mm256_loadu_pd(&A_packed[8 + j * mr]);
+            _mm256_storeu_pd(&A[8 + j * lda], a3);
         }
     }
     else

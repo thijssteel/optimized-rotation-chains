@@ -4,7 +4,7 @@ CFLAGS=-march=native -Wall -g -O3
 CXX=g++
 CXXFLAGS=-march=native -Wall -g -O3
 
-test: test/test_kernels_avx2 test/test_block_avx2 test/test_drotc
+test: test/test_kernels_avx2 test/test_block_avx2 test/test_drotc test/profile_drotc
 
 optimized/kernels_avx2_double.o: optimized/kernels_avx2_double.c
 	$(CC) -c -o $@ $< $(CFLAGS)
