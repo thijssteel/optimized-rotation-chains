@@ -69,6 +69,32 @@ void profile_rotc(
 
 int main()
 {
+    // Do a 2000x2000 matmul as a warmup
+    {
+        double *A = (double *)aligned_alloc(64, 2000* 2000 * sizeof(double));
+        double *B = (double *)aligned_alloc(64, 2000* 2000  * sizeof(double));
+        double *C = (double *)aligned_alloc(64, 2000* 2000  * sizeof(double));
+
+        for (int i = 0; i < 2000* 2000; i++)
+        {
+            A[i] = (double)rand() / RAND_MAX;
+            B[i] = (double)rand() / RAND_MAX;
+            C[i] = 0;
+        }
+
+        for(int j = 0; j < 2000; j++){
+            for( int p =0;p < 2000; p++ ){
+                for(int i=0; i < 2000; i++){
+                    C[i + j * 2000] += A[i + p * 2000] * B[p + j * 2000];
+                }
+            }
+        }
+
+        free(A);
+        free(B);
+        free(C);
+    }
+
     std::cout << "=================================" << std::endl;
     std::cout << "profiling drotc" << std::endl;
     std::cout << "=================================" << std::endl;

@@ -111,11 +111,11 @@ int main()
 
     // test_drotc<double>(1000, 300, 100, drotc);
 
-    for(int m = 100; m <= 1000; m += 100)
+    for(int m = 200; m <= 1000; m += 100)
     {
-        for(int n = 100; n <= 1000; n += 100)
+        for(int n = 200; n <= 1000; n += 100)
         {
-            for(int k = 60; k <= 300; k += 60)
+            for(int k = 30; k <= 200; k += 30)
             {
                 // test_drotc<float>(m, n, k, srotc);
                 test_drotc<double>(m, n, k, drotc);
