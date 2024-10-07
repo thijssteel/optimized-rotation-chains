@@ -210,6 +210,9 @@ void test_packing(
             // Calculate result using kernel
             pack_kernel(m, n, A, m, Ap);
 
+            // Unpack Ap into A
+            unpack_kernel(m, n, Ap, A, m);
+
             // Compare results
             double err = 0;
             for (int i = 0; i < mp * n; i++)
@@ -217,21 +220,21 @@ void test_packing(
                 err = std::max(err, std::abs(Ap[i] - Ap_ref[i]));
             }
 
-            if (err == 0)
+            double err2 = 0;
+            for (int i = 0; i < m * n; i++)
+            {
+                err2 = std::max(err2, std::abs(A[i] - A_copy[i]));
+            }
+
+            if (err == 0 and err2 == 0)
             {
                 std::cout << "Test passed, m = " << m << ", n = " << n << std::endl;
             }
             else
             {
                 std::cout << "Test failed, m = " << m << ", n = " << n << std::endl;
-                std::cout << "Error: " << err << std::endl;
-                for (int i = 0; i < mp * n; i++)
-                {
-                    if (std::abs(Ap[i] - Ap_ref[i]) > 0)
-                    {
-                        std::cout << "Ap[" << i << "] = " << Ap[i] << ", Ap_ref[" << i << "] = " << Ap_ref[i] << std::endl;
-                    }
-                }
+                std::cout << "Packing error: " << err << std::endl;
+                std::cout << "Unpacking error: " << err2 << std::endl;
             }
 
             delete[] A;

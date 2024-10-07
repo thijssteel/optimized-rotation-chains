@@ -3,7 +3,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "optimized/rotc.h"
+#include "optimized/drotc.h"
 
 template <typename T>
 void drotc_reference(
@@ -88,13 +88,13 @@ void test_drotc(
     {
         std::cout << "Test failed, m = " << m << ", n = " << n << ", k = " << k << std::endl;
         std::cout << "Error: " << err << std::endl;
-        for (int i = 0; i < m * (n+1); i++)
-        {
-            if (std::abs(A[i] - A_ref[i]) > tol)
-            {
-                std::cout << "A[" << i << "] = " << A[i] << ", A_ref[" << i << "] = " << A_ref[i] << std::endl;
-            }
-        }
+        // for (int i = 0; i < m * (n+1); i++)
+        // {
+        //     if (std::abs(A[i] - A_ref[i]) > tol)
+        //     {
+        //         std::cout << "A[" << i << "] = " << A[i] << ", A_ref[" << i << "] = " << A_ref[i] << std::endl;
+        //     }
+        // }
     }
 
     delete[] A_ref;
@@ -109,11 +109,13 @@ int main()
     std::cout << "Testing drotc" << std::endl;
     std::cout << "=================================" << std::endl;
 
+    // test_drotc<double>(1000, 300, 100, drotc);
+
     for(int m = 100; m <= 1000; m += 100)
     {
         for(int n = 100; n <= 1000; n += 100)
         {
-            for(int k = 100; k <= 300; k += 100)
+            for(int k = 60; k <= 300; k += 60)
             {
                 // test_drotc<float>(m, n, k, srotc);
                 test_drotc<double>(m, n, k, drotc);

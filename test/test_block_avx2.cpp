@@ -22,8 +22,8 @@ void reference_block(
         for (int j = 0; j < n; j++)
         {
             int g = j + k - 1 - p;
-            T c = C[g + p * ldc];
-            T s = S[g + p * lds];
+            T c = C[p * ldc];
+            T s = S[p * lds];
             for (int i = 0; i < m; i++)
             {
                 T temp = c * A[i + g * lda] + s * A[i + (g + 1) * lda];

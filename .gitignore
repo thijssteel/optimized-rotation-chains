@@ -4,6 +4,13 @@
 test_kernels_ref
 test_kernels_avx
 test_kernels_avx2
-test_block_avx2
+
 test_drotc
+test_drotc_ref
+test_drotc_avx
+test_drotc_avx2
+
 profile_drotc
+profile_drotc_ref
+profile_drotc_avx
+profile_drotc_avx2

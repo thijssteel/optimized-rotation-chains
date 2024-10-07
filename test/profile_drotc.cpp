@@ -5,7 +5,7 @@
 #include <limits>
 #include <chrono>
 
-#include "optimized/rotc.h"
+#include "optimized/drotc.h"
 
 template <typename T>
 void profile_rotc(
