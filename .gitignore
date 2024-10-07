@@ -1,6 +1,8 @@
 .vscode
 *.o
 
+test_kernels_ref
+test_kernels_avx
 test_kernels_avx2
 test_block_avx2
 test_drotc

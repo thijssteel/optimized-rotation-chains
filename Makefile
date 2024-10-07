@@ -1,28 +1,25 @@
 CC=gcc
-CFLAGS=-march=native -Wall -g -O3
+CFLAGS=-Wall -g -O3
 
 CXX=g++
-CXXFLAGS=-march=native -Wall -g -O3
+CXXFLAGS=-Wall -g -O3
 
-test: test/test_kernels_avx2 test/test_block_avx2 test/test_drotc test/profile_drotc
+test: test/test_kernels_ref test/test_kernels_avx test/test_kernels_avx2
 
-optimized/kernels_avx2_double.o: optimized/kernels_avx2_double.c
+optimized/drotc_kernels_ref.o: optimized/drotc_kernels_ref.c optimized/drotc_kernels.h optimized/drotc_params.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-optimized/kernels_avx2_single.o: optimized/kernels_avx2_single.c
-	$(CC) -c -o $@ $< $(CFLAGS)
+optimized/drotc_kernels_avx.o: optimized/drotc_kernels_avx.c optimized/drotc_kernels.h optimized/drotc_params.h
+	$(CC) -c -o $@ $< $(CFLAGS) -march=ivybridge
 
-optimized/rotc_avx2_double.o: optimized/rotc_avx2_double.c optimized/kernels_avx2.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+optimized/drotc_kernels_avx2.o: optimized/drotc_kernels_avx2.c optimized/drotc_kernels.h optimized/drotc_params.h
+	$(CC) -c -o $@ $< $(CFLAGS) -march=skylake
 
-test/test_kernels_avx2: test/test_kernels_avx2.cpp optimized/kernels_avx2_double.o optimized/kernels_avx2_single.o
+test/test_kernels_ref: test/test_kernels.cpp optimized/drotc_kernels_ref.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I.
 
-test/test_block_avx2: test/test_block_avx2.cpp optimized/kernels_avx2_double.o optimized/kernels_avx2_single.o optimized/rotc_avx2_double.o
-	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I.
+test/test_kernels_avx: test/test_kernels.cpp optimized/drotc_kernels_avx.o
+	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I. -march=ivybridge
 
-test/test_drotc: test/test_drotc.cpp optimized/kernels_avx2_double.o optimized/kernels_avx2_single.o optimized/rotc_avx2_double.o
-	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I.
-
-test/profile_drotc: test/profile_drotc.cpp optimized/kernels_avx2_double.o optimized/kernels_avx2_single.o optimized/rotc_avx2_double.o
-	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I.
+test/test_kernels_avx2: test/test_kernels.cpp optimized/drotc_kernels_avx2.o
+	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I. -march=skylake
