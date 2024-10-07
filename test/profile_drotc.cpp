@@ -15,12 +15,12 @@ void profile_rotc(
     void (*rotc)(char side, char dir, bool startup, bool shutdown, int m, int n, int k, T *A, int lda, const T *C, int ldc, const T *S, int lds))
 {
 
-    T *A = (T *)aligned_alloc(64, m * n * sizeof(T));
+    T *A = (T *)aligned_alloc(64, m * (n+1) * sizeof(T));
     T *C = (T *)aligned_alloc(64, k * n * sizeof(T));
     T *S = (T *)aligned_alloc(64, k * n * sizeof(T));
 
     // Fill A with random values
-    for (int i = 0; i < m * n; i++)
+    for (int i = 0; i < m * (n+1); i++)
     {
         A[i] = (T)rand() / RAND_MAX;
     }
@@ -33,8 +33,8 @@ void profile_rotc(
         S[i] = sin(angle);
     }
 
-    T *A_copy = (T *)aligned_alloc(64, m * n * sizeof(T));
-    std::copy(A, A + m * n, A_copy);
+    T *A_copy = (T *)aligned_alloc(64, m * (n+1) * sizeof(T));
+    std::copy(A, A + m * (n+1), A_copy);
 
     int n_timing = 20;
     int n_repeat = 5;
@@ -42,7 +42,7 @@ void profile_rotc(
 
     for (int i = 0; i < n_timing; i++)
     {
-        std::copy(A_copy, A_copy + m * n, A);
+        std::copy(A_copy, A_copy + m * (n+1), A);
         auto start = std::chrono::high_resolution_clock::now();
         for (int j = 0; j < n_repeat; j++)
         {
@@ -57,7 +57,7 @@ void profile_rotc(
         }
     }
 
-    double gflops = (6.0 * m * k * (n-k)) / timing_min / 1e9;
+    double gflops = (6.0 * m * k * (n-k+1)) / timing_min / 1e9;
 
     std::cout << "m = " << m << ", n = " << n << ", k = " << k << ", timing = " << timing_min << " s, gflops = " << gflops << std::endl;
 

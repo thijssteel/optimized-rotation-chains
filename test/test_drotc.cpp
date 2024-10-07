@@ -21,7 +21,7 @@ void drotc_reference(
 
     for (int p = 0; p < k; p++)
     {
-        for (int j = k - 1 - p; j < n - 1 - p; j++)
+        for (int j = k - 1 - p; j < n - p; j++)
         {
             T c = C[j + p * ldc];
             T s = S[j + p * lds];
@@ -43,13 +43,13 @@ void test_drotc(
     void (*rotc)(char side, char dir, bool startup, bool shutdown, int m, int n, int k, T *A, int lda, const T *C, int ldc, const T *S, int lds))
 {
 
-    T *A = new T[m * n];
+    T *A = new T[m * (n+1)];
 
     T *C = new T[k * n];
     T *S = new T[k * n];
 
     // Fill A with random values
-    for (int i = 0; i < m * n; i++)
+    for (int i = 0; i < m * (n+1); i++)
     {
         A[i] = (T)rand() / RAND_MAX;
     }
@@ -63,8 +63,8 @@ void test_drotc(
     }
 
     // Calculate reference result using drotc_reference
-    T *A_ref = new T[m * n];
-    std::copy(A, A + m * n, A_ref);
+    T *A_ref = new T[m * (n+1)];
+    std::copy(A, A + m * (n+1), A_ref);
     drotc_reference(m, n, k, A_ref, m, C, n, S, n);
 
     // Calculate result using optimized drotc
@@ -75,7 +75,7 @@ void test_drotc(
     // can actually use exact equality if desired.
     const T tol = 1.0e10 * std::numeric_limits<T>::epsilon();
     T err = 0;
-    for (int i = 0; i < m * n; i++)
+    for (int i = 0; i < m * (n+1); i++)
     {
         err = std::max(err, std::abs(A[i] - A_ref[i]));
     }
@@ -88,7 +88,7 @@ void test_drotc(
     {
         std::cout << "Test failed, m = " << m << ", n = " << n << ", k = " << k << std::endl;
         std::cout << "Error: " << err << std::endl;
-        for (int i = 0; i < m * n; i++)
+        for (int i = 0; i < m * (n+1); i++)
         {
             if (std::abs(A[i] - A_ref[i]) > tol)
             {

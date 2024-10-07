@@ -154,7 +154,12 @@ void drotc_pipeline_block_right(int m, int n, int k, double *A, int lda, double 
     }
 }
 
-void drotc(char side, char dir, bool startup, bool shutdown, int m, int n, int k, double *A, int lda, const double *C, int ldc, const double *S, int lds)
+/**
+ * @brief DROTC applies a chain of k rotation sequences of length n to a matrix A.
+ */
+void drotc(char side, char dir, bool startup, bool shutdown,
+int m, int n, int k, double *A, int lda,
+const double *C, int ldc, const double *S, int lds)
 {
 
     if (side == 'L')
@@ -200,9 +205,9 @@ void drotc(char side, char dir, bool startup, bool shutdown, int m, int n, int k
     {
         int m2 = min(m - ib, mb);
 
-        for (int jb = 0; jb < n - k; jb += nb)
+        for (int jb = 0; jb < n - k + 1; jb += nb)
         {
-            int n2 = min(n - k - jb, nb);
+            int n2 = min(n - k + 1 - jb, nb);
 
             for (int pb = 0; pb < k; pb += kb)
             {

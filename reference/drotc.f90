@@ -140,7 +140,7 @@
 subroutine drotc(side, dir, startup, shutdown, m, n, k,&
     A, lda, C, ldc, S, lds)
 !    .. Scalar Arguments ..
-    integer, intent(in) :: m, n, k
+    integer, intent(in) :: m, n, k, lda, ldc, lds
     character, intent(in) :: dir, side
     logical, intent(in) :: startup, shutdown
 !    .. Array Arguments ..
