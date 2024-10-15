@@ -26,6 +26,9 @@ optimized/drotc_avx.o: optimized/drotc.c optimized/drotc.h optimized/drotc_kerne
 optimized/drotc_avx2.o: optimized/drotc.c optimized/drotc.h optimized/drotc_kernels.h optimized/drotc_params.h
 	$(CC) -c -o $@ $< $(CFLAGS) -march=skylake
 
+optimized/drotc_avx512.o: optimized/drotc.c optimized/drotc.h optimized/drotc_kernels.h optimized/drotc_params.h
+	$(CC) -c -o $@ $< $(CFLAGS) -march=icelake-server
+
 # Tests
 
 test/test_kernels_ref: test/test_kernels.cpp optimized/drotc_kernels_ref.o
@@ -36,6 +39,9 @@ test/test_kernels_avx: test/test_kernels.cpp optimized/drotc_kernels_avx.o
 
 test/test_kernels_avx2: test/test_kernels.cpp optimized/drotc_kernels_avx2.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I. -march=skylake
+
+test/test_kernels_avx512: test/test_kernels.cpp optimized/drotc_kernels_avx512.o
+	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I. -march=icelake-server
 
 test/test_drotc_ref: test/test_drotc.cpp optimized/drotc_kernels_ref.o optimized/drotc_ref.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I.

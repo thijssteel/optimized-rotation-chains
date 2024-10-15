@@ -21,8 +21,8 @@
 #ifdef __AVX512F__
 #undef MR
 #undef KR
-#define MR 24
-#define KR 6
+#define MR 32
+#define KR 5
 #endif
 
 #endif
