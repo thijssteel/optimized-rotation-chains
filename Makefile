@@ -17,8 +17,8 @@ optimized/drotc_kernels_avx.o: optimized/drotc_kernels_avx.c optimized/drotc_ker
 optimized/drotc_kernels_avx2.o: optimized/drotc_kernels_avx2.c optimized/drotc_kernels.h optimized/drotc_params.h
 	$(CC) -c -o $@ $< $(CFLAGS) -march=skylake
 
-optimized/drotc_kernels_avx512.o: optimized/drotc_kernels_avx2.c optimized/drotc_kernels.h optimized/drotc_params.h
-	$(CC) -c -o $@ $< $(CFLAGS) -march=icelake-server
+optimized/drotc_kernels_avx512.o: optimized/drotc_kernels_avx512.c optimized/drotc_kernels.h optimized/drotc_params.h
+	$(CC) -c -o $@ $< $(CFLAGS) -march=native
 
 optimized/drotc_ref.o: optimized/drotc.c optimized/drotc.h optimized/drotc_kernels.h optimized/drotc_params.h
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -44,7 +44,7 @@ test/test_kernels_avx2: test/test_kernels.cpp optimized/drotc_kernels_avx2.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I. -march=skylake
 
 test/test_kernels_avx512: test/test_kernels.cpp optimized/drotc_kernels_avx512.o
-	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I. -march=icelake-server
+	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I. -march=native
 
 test/test_drotc_ref: test/test_drotc.cpp optimized/drotc_kernels_ref.o optimized/drotc_ref.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I.
