@@ -17,6 +17,9 @@ optimized/drotc_kernels_avx.o: optimized/drotc_kernels_avx.c optimized/drotc_ker
 optimized/drotc_kernels_avx2.o: optimized/drotc_kernels_avx2.c optimized/drotc_kernels.h optimized/drotc_params.h
 	$(CC) -c -o $@ $< $(CFLAGS) -march=skylake
 
+optimized/drotc_kernels_avx512.o: optimized/drotc_kernels_avx2.c optimized/drotc_kernels.h optimized/drotc_params.h
+	$(CC) -c -o $@ $< $(CFLAGS) -march=icelake-server
+
 optimized/drotc_ref.o: optimized/drotc.c optimized/drotc.h optimized/drotc_kernels.h optimized/drotc_params.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
