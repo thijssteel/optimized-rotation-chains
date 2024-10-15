@@ -51,7 +51,7 @@ template <typename T>
 void test_kernel_mrxnxkr(
     void (*kernel)(int n, T *A, const T *C, int ldc, const T *S, int lds))
 {
-    for (int n = 1; n < 2; n++)
+    for (int n = 1; n <= 10; n++)
     {
         T *A = new T[MR * (n + KR)];
         T *C = new T[n * KR];
