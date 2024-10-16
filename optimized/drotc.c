@@ -8,6 +8,18 @@
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
+void drotc_startup_block(int m, int n, int k, double *Ap, int ldap, const double *C, int ldc, const double *S, int lds)
+{
+
+    for (int i = 0; i < m; i += MR)
+    {
+        for (int p = 0; p < k; p += 1)
+        {
+            drotc_kernel_mrxnx1(n-p, &Ap[i * ldap], &C[p * ldc], &S[p * lds]);
+        }
+    }
+}
+
 void drotc_pipeline_block(int m, int n, int k, double *Ap, int ldap, const double *C, int ldc, const double *S, int lds)
 {
 
@@ -43,11 +55,11 @@ void drotc(char side, char dir, bool startup, bool shutdown,
         return;
     }
 
-    if (startup)
-    {
-        printf("Startup rotation is not supported yet\n");
-        return;
-    }
+    // if (startup)
+    // {
+    //     printf("Startup rotation is not supported yet\n");
+    //     return;
+    // }
 
     if (shutdown)
     {
@@ -72,6 +84,27 @@ void drotc(char side, char dir, bool startup, bool shutdown,
 
         drotc_pack_A(m2, (n+1), &A[ib], lda, A_pack);
 
+        //
+        // Startup phase
+        //
+        if( startup ){
+            // Note, startup phase is more difficult to do with jb -> pb loop order,
+            // so we do pb -> jb loop order here
+            for( int pb = 0; pb < k; pb += kb ){
+                int k2 = min(k - pb, kb);
+                int jb = min(k - 1 - pb, nb);
+                drotc_startup_block(m2, jb, k2, A_pack, n+1, &C[pb * ldc], ldc, &S[pb * lds], lds);
+                for(;jb < k - 1 - pb; jb+=nb){
+                    int n2 = min(k - 1 - pb - jb, nb);
+                    int gb = jb - (k2 - 1);
+                    drotc_pipeline_block(m2, n2, k2, &A_pack[gb*MR], n+1, &C[pb * ldc + jb], ldc-1, &S[pb * lds + jb], lds-1);
+                }
+            }
+        }
+
+        //
+        // Pipeline phase
+        //
         for (int jb = 0; jb < n - k + 1; jb += nb)
         {
             int n2 = min(n - k + 1 - jb, nb);
