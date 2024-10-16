@@ -14,9 +14,11 @@ void reference_kernel(int mr, int kr, int n, double *A, const double *C, int ldc
         {
             double c = C[j + p * ldc];
             double s = S[j + p * lds];
+	    //std::cout << "c = " << c << " s = " << s << std::endl;
             int g = j + kr - 1 - p;
             for (int i = 0; i < mr; i++)
             {
+	        //std::cout << "A[" << i << "] = " << A[i + g * mr] << " , " << A[i + (g + 1) * mr] << std::endl;	
                 double temp = c * A[i + g * mr] + s * A[i + (g + 1) * mr];
                 A[i + (g + 1) * mr] = -s * A[i + g * mr] + c * A[i + (g + 1) * mr];
                 A[i + g * mr] = temp;
@@ -49,7 +51,7 @@ template <typename T>
 void test_kernel_mrxnxkr(
     void (*kernel)(int n, T *A, const T *C, int ldc, const T *S, int lds))
 {
-    for (int n = 1; n < 10; n++)
+    for (int n = 1; n <= 10; n++)
     {
         T *A = new T[MR * (n + KR)];
         T *C = new T[n * KR];
@@ -96,7 +98,7 @@ void test_kernel_mrxnxkr(
             std::cout << "Error: " << err << std::endl;
             for (int i = 0; i < MR * (n + KR); i++)
             {
-                if (std::abs(A[i] - A_ref[i]) > tol)
+                //if (std::abs(A[i] - A_ref[i]) > tol)
                 {
                     std::cout << "A[" << i << "] = " << A[i] << ", A_ref[" << i << "] = " << A_ref[i] << std::endl;
                 }
@@ -114,7 +116,7 @@ template <typename T>
 void test_kernel_mrxnx1(
     void (*kernel)(int n, T *A, const T *C, const T *S))
 {
-    for (int n = 1; n < 10; n++)
+    for (int n = 1; n <= 10; n++)
     {
         T *A = new T[MR * (n + 1)];
         T *C = new T[n];
@@ -159,9 +161,9 @@ void test_kernel_mrxnx1(
         {
             std::cout << "Test failed, MR = " << MR << ", KR = " << KR << ", n = " << n << std::endl;
             std::cout << "Error: " << err << std::endl;
-            for (int i = 0; i < MR * (n + KR); i++)
+            for (int i = 0; i < MR * (n + 1); i++)
             {
-                if (std::abs(A[i] - A_ref[i]) > tol)
+                //if (std::abs(A[i] - A_ref[i]) > tol)
                 {
                     std::cout << "A[" << i << "] = " << A[i] << ", A_ref[" << i << "] = " << A_ref[i] << std::endl;
                 }
