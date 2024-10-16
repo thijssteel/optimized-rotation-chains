@@ -45,6 +45,10 @@ void drotc_pipeline_block(int m, int n, int k, double *Ap, int ldap, const doubl
 
 void drotc(char side, char dir, bool startup, bool shutdown, int m, int n, int k, double *A, int lda, const double *C, int ldc, const double *S, int lds);
 
+void drotc_prepacked(char side, char dir, bool startup, bool shutdown,
+           int m, int n, int k, double *A_pack, int ldap,
+           const double *C, int ldc, const double *S, int lds);
+
 #ifdef __cplusplus
 }
 #endif
