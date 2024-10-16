@@ -17,3 +17,9 @@ profile_drotc_ref
 profile_drotc_avx
 profile_drotc_avx2
 profile_drotc_avx512
+
+*.aux
+*.log
+*.fdb_latexmk
+*.fls
+*.synctex.gz

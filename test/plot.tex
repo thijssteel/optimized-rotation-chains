@@ -1,0 +1,179 @@
+\documentclass{standalone}
+
+\usepackage{pgfplots}
+
+\definecolor{ferngreen}{HTML}{56641a}
+\definecolor{winered}{HTML}{984464}
+
+\begin{document}
+
+\begin{tikzpicture}
+    \begin{axis}[
+            xlabel=$n$,
+            ylabel=Gflop/s,
+            grid=major,
+            width=0.49\textwidth,
+            ytick={15,16,17,18,19,20},
+            mark size=1.5pt,
+            title={Xeon E5-2650 v2},
+            cycle list={
+                {black,mark=none},
+                {ferngreen,mark=square},
+                {winered,mark=o},
+            }
+        ]
+
+        \addplot coordinates {
+            (420, 20.4)
+            (840, 20.4)
+            (1260, 20.4)
+            (1680, 20.4)
+            (2100, 20.4)
+            (2520, 20.4)
+            (2940, 20.4)
+            (3360, 20.4)
+            (3780, 20.4)
+        };
+
+        \addplot coordinates {
+            (420,  19.71  )
+            (840,  19.7001)
+            (1260, 19.6787)
+            (1680, 19.6493)
+            (2100, 19.6246)
+            (2520, 19.6201)
+            (2940, 19.6024)
+            (3360, 19.5902)
+            (3780, 19.5996)
+        };
+
+        \addplot coordinates {
+            (420,  18.9515)
+            (840,  18.8939)
+            (1260, 18.2875)
+            (1680, 17.9938)
+            (2100, 17.9506)
+            (2520, 17.9191)
+            (2940, 17.9152)
+            (3360, 17.8088)
+            (3780, 17.8113)
+        };
+
+    \end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}
+    \begin{axis}[
+            xlabel=$n$,
+            ylabel=Gflop/s,
+            grid=major,
+            width=0.49\textwidth,
+            ytick={24,26,28,30,32,34,36,38,40,42,44},
+            mark size=1.5pt,
+            title={Xeon E5-2697 v3},
+            cycle list={
+                {black,mark=none},
+                {ferngreen,mark=square},
+                {winered,mark=o},
+            }
+        ]        
+
+        \addplot coordinates {
+            (420,  43.2)
+            (840,  43.2)
+            (1260, 43.2)
+            (1680, 43.2)
+            (2100, 43.2)
+            (2520, 43.2)
+            (2940, 43.2)
+            (3360, 43.2)
+            (3780, 43.2)
+        };
+
+        \addplot coordinates {
+            (420,  31.3465)
+            (840,  31.1583)
+            (1260, 31.2467)
+            (1680, 31.1227)
+            (2100, 31.2041)
+            (2520, 31.1729)
+            (2940, 31.0663)
+            (3360, 30.9817)
+            (3780, 30.9451)
+        };
+
+        \addplot coordinates {
+            (420,  29.6517)
+            (840,  29.6333)
+            (1260, 29.2441)
+            (1680, 27.5894)
+            (2100, 26.5484)
+            (2520, 26.113 )
+            (2940, 25.7742)
+            (3360, 25.6236)
+            (3780, 25.5907)
+        };
+
+    \end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}
+    \begin{axis}[
+            xlabel=$n$,
+            ylabel=Gflop/s,
+            grid=major,
+            width=0.49\textwidth,
+            ytick={60,65,70,75,80,85},
+            legend style={at={(1.03,1.0)},anchor=north west},
+            mark size=1.5pt,
+            title={Xeon Gold 6330N},
+            cycle list={
+                {black,mark=none},
+                {ferngreen,mark=square},
+                {winered,mark=o},
+            }
+        ]
+
+        \addplot coordinates {
+            (420,  81.6)
+            (840,  81.6)
+            (1260, 81.6)
+            (1680, 81.6)
+            (2100, 81.6)
+            (2520, 81.6)
+            (2940, 81.6)
+            (3360, 81.6)
+            (3780, 81.6)
+        };
+        \addlegendentry{Theoretical peak}
+
+        \addplot coordinates {
+            (420,  69.2289)
+            (840,  72.4063)
+            (1260, 73.3489)
+            (1680, 74.0581)
+            (2100, 74.4251)
+            (2520, 74.5336)
+            (2940, 74.3701)
+            (3360, 74.161 )
+            (3780, 73.1387)
+        };
+        \addlegendentry{Prepacking}
+
+        \addplot coordinates {
+            (420,  62.1218)
+            (840,  66.5719)
+            (1260, 66.1589)
+            (1680, 64.402 )
+            (2100, 63.4721)
+            (2520, 63.343 )
+            (2940, 61.6858)
+            (3360, 62.2594)
+            (3780, 60.2524)
+        };
+        \addlegendentry{No prepacking}
+
+    \end{axis}
+\end{tikzpicture}
+
+\end{document}
