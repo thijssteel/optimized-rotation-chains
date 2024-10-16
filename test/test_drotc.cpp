@@ -143,7 +143,7 @@ int main()
             for(int k = 30; k <= 300; k += 60)
             {
                 // test_drotc<float>(m, n, k, srotc);
-                test_drotc<double>(true, false, m, n, k, drotc);
+                test_drotc<double>(true, true, m, n, k, drotc);
             }
         }
     }

@@ -15,7 +15,25 @@ void drotc_startup_block(int m, int n, int k, double *Ap, int ldap, const double
     {
         for (int p = 0; p < k; p += 1)
         {
+            // Note, we only use the mrxnx1 kernel here. This is generally less efficient
+            // than using the mrxnxkr kernel, but it is simpler to implement.
+            // We are assuming here that the startup phase is not (that) performance critical.
             drotc_kernel_mrxnx1(n-p, &Ap[i * ldap], &C[p * ldc], &S[p * lds]);
+        }
+    }
+}
+
+void drotc_shutdown_block(int m, int n, int k, double *Ap, int ldap, const double *C, int ldc, const double *S, int lds)
+{
+    for (int i = 0; i < m; i += MR)
+    {
+        for (int p = 0, g = k-1; p < k; p += 1, g -= 1)
+        {
+            // printf("p: %d, g: %d\n", p, g);
+            // Note, we only use the mrxnx1 kernel here. This is generally less efficient
+            // than using the mrxnxkr kernel, but it is simpler to implement.
+            // We are assuming here that the shutdown phase is not (that) performance critical.
+            drotc_kernel_mrxnx1(n-g, &Ap[i * ldap + g*MR], &C[p * ldc + g], &S[p * lds + g]);
         }
     }
 }
@@ -55,18 +73,6 @@ void drotc(char side, char dir, bool startup, bool shutdown,
         return;
     }
 
-    // if (startup)
-    // {
-    //     printf("Startup rotation is not supported yet\n");
-    //     return;
-    // }
-
-    if (shutdown)
-    {
-        printf("Shutdown rotation is not supported yet\n");
-        return;
-    }
-
     // Make sure that kb and mb are multiples of kr and mr respectively
     const int nb = 216;
     const int kb = 60;
@@ -92,7 +98,7 @@ void drotc(char side, char dir, bool startup, bool shutdown,
             // so we do pb -> jb loop order here
             for( int pb = 0; pb < k; pb += kb ){
                 int k2 = min(k - pb, kb);
-                int jb = min(k - 1 - pb, nb);
+                int jb = min(k - 1 - pb, k2);
                 drotc_startup_block(m2, jb, k2, A_pack, n+1, &C[pb * ldc], ldc, &S[pb * lds], lds);
                 for(;jb < k - 1 - pb; jb+=nb){
                     int n2 = min(k - 1 - pb - jb, nb);
@@ -122,6 +128,20 @@ void drotc(char side, char dir, bool startup, bool shutdown,
 
                 drotc_pipeline_block(m2, n2, k2, &A_pack[gb2*MR], n+1, &C[gb + pb * ldc],
                                            ldc - 1, &S[gb + pb * lds], lds - 1);
+            }
+        }
+
+        //
+        // Shutdown phase
+        //
+        if( shutdown ){
+            // Note, shutdown phase is more difficult to do with jb -> pb loop order,
+            // so we do pb -> jb loop order here
+            for( int pb = 0; pb < k; pb += kb ){
+                int k2 = min(k - pb, kb);
+                int jb = n - pb - (k2-1);
+                int n2 = n - jb;
+                drotc_shutdown_block(m2, n2, k2, &A_pack[jb*MR], n+1, &C[pb * ldc + jb], ldc, &S[pb * lds + jb], lds);
             }
         }
 
