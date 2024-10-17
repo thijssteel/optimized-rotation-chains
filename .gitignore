@@ -12,6 +12,7 @@ test_drotc_avx
 test_drotc_avx2
 test_drotc_avx512
 
+profile_gemm
 profile_drotc
 profile_drotc_ref
 profile_drotc_avx

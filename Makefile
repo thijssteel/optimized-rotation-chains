@@ -4,6 +4,8 @@ CFLAGS=-Wall -g -O3
 CXX=g++
 CXXFLAGS=-Wall -g -O3
 
+LAPACK_LIBS=-m64  -L${MKLROOT}/lib -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+
 test: test/test_kernels_ref test/test_kernels_avx test/test_kernels_avx2
 
 # Actual implementation
@@ -69,3 +71,6 @@ test/profile_drotc_avx2: test/profile_drotc.cpp optimized/drotc_kernels_avx2.o o
 
 test/profile_drotc_avx512: test/profile_drotc.cpp optimized/drotc_kernels_avx512.o optimized/drotc_avx512.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I. -march=icelake-server
+
+test/profile_gemm: test/profile_gemm.cpp
+	$(CXX) -o $@ $^ $(CXXFLAGS) -lstdc++ -I. -march=native $(LAPACK_LIBS)
