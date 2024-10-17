@@ -4,7 +4,7 @@ The proposed extension concerns Givens rotations. A rotation can be applied to t
 
 Note that our efficient implementation does not offer all options. No application from the left, no backward application and the startup and shutdown phases are not fully optimized. The implementation is intended to demonstrate the potential of the operation and to provide a starting point for further development.
 
-Below are some results of the performance of the implementation. We apply a chain of 180 sequences of rotations to a matrix of size n x n. The matrix is stored in column-major order. The performance is measured in terms of the number of flops per second. Rotations are inherently limited to 75% of the peak performance so the black line does not represent the peak performance of the hardware, but 75% of it.
+Below are some results of the performance of the implementation. We apply a chain of 180 sequences of rotations to a matrix of size n x n. The matrix is stored in column-major order. The performance is measured in terms of the number of flops per second. For comparison purposes, we also show the performance MKL's dgemm with m = n and k = 180. Since rotations are inherently limited to 75% of the theoretical peak performance, we multiply the dgemm performance by 0.75.
 
 ![Plot of the performance of the implementation](./test/plot.pdf)
 
