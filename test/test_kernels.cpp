@@ -34,6 +34,33 @@ void reference_kernel(int mr,
     }
 }
 
+void reference_kernel_backwards(int mr,
+                                int kr,
+                                int n,
+                                double* A,
+                                const double* C,
+                                int ldc,
+                                const double* S,
+                                int lds)
+{
+    for (int p = 0; p < kr; p++) {
+        for (int j = n - 1; j >= 0; j--) {
+            double c = C[j + p * ldc];
+            double s = S[j + p * lds];
+            // std::cout << "c = " << c << " s = " << s << std::endl;
+            int g = j + p;
+            for (int i = 0; i < mr; i++) {
+                // std::cout << "A[" << i << "] = " << A[i + g * mr] << " , " <<
+                // A[i + (g + 1) * mr] << std::endl;
+                double temp = c * A[i + g * mr] + s * A[i + (g + 1) * mr];
+                A[i + (g + 1) * mr] =
+                    -s * A[i + g * mr] + c * A[i + (g + 1) * mr];
+                A[i + g * mr] = temp;
+            }
+        }
+    }
+}
+
 void reference_packing(int m, int n, double* A, int lda, double* Ap)
 {
     int ib = 0;
@@ -56,6 +83,7 @@ void reference_packing(int m, int n, double* A, int lda, double* Ap)
 
 template <typename T>
 void test_kernel_mrxnxkr(
+    bool backward,
     void (*kernel)(int n, T* A, const T* C, int ldc, const T* S, int lds))
 {
     for (int n = 1; n <= 10; n++) {
@@ -77,7 +105,12 @@ void test_kernel_mrxnxkr(
         // Calculate reference result using reference_kernel
         T* A_ref = new T[MR * (n + KR)];
         std::copy(A, A + MR * (n + KR), A_ref);
-        reference_kernel(MR, KR, n, A_ref, C, n, S, n);
+        if (backward) {
+            reference_kernel_backwards(MR, KR, n, A_ref, C, n, S, n);
+        }
+        else {
+            reference_kernel(MR, KR, n, A_ref, C, n, S, n);
+        }
 
         // Calculate result using kernel
         kernel(n, A, C, n, S, n);
@@ -116,7 +149,8 @@ void test_kernel_mrxnxkr(
 }
 
 template <typename T>
-void test_kernel_mrxnx1(void (*kernel)(int n, T* A, const T* C, const T* S))
+void test_kernel_mrxnx1(bool backward,
+                        void (*kernel)(int n, T* A, const T* C, const T* S))
 {
     for (int n = 1; n <= 10; n++) {
         T* A = new T[MR * (n + 1)];
@@ -137,7 +171,12 @@ void test_kernel_mrxnx1(void (*kernel)(int n, T* A, const T* C, const T* S))
         // Calculate reference result using reference_kernel
         T* A_ref = new T[MR * (n + 1)];
         std::copy(A, A + MR * (n + 1), A_ref);
-        reference_kernel(MR, 1, n, A_ref, C, n, S, n);
+        if (backward) {
+            reference_kernel_backwards(MR, 1, n, A_ref, C, n, S, n);
+        }
+        else {
+            reference_kernel(MR, 1, n, A_ref, C, n, S, n);
+        }
 
         // Calculate result using kernel
         kernel(n, A, C, S);
@@ -242,16 +281,29 @@ void test_packing(
 int main()
 {
     std::cout << "=================================" << std::endl;
-    std::cout << "Testing full kernels" << std::endl;
+    std::cout << "Testing forward full kernels" << std::endl;
     std::cout << "=================================" << std::endl;
 
-    test_kernel_mrxnxkr(drotc_kernel_mrxnxkr);
+    test_kernel_mrxnxkr(false, drotc_kernel_mrxnxkr);
+
 
     std::cout << "=================================" << std::endl;
-    std::cout << "Testing edge kernels" << std::endl;
+    std::cout << "Testing forward edge kernels" << std::endl;
     std::cout << "=================================" << std::endl;
 
-    test_kernel_mrxnx1(drotc_kernel_mrxnx1);
+    test_kernel_mrxnx1(false, drotc_kernel_mrxnx1);
+
+    std::cout << "=================================" << std::endl;
+    std::cout << "Testing backward full kernels" << std::endl;
+    std::cout << "=================================" << std::endl;
+
+    test_kernel_mrxnxkr(true, drotc_kernel_mrxnxkr_backward);
+
+    std::cout << "=================================" << std::endl;
+    std::cout << "Testing backward edge kernels" << std::endl;
+    std::cout << "=================================" << std::endl;
+
+    test_kernel_mrxnx1(true, drotc_kernel_mrxnx1_backward);
 
     std::cout << "=================================" << std::endl;
     std::cout << "Testing packing kernels" << std::endl;
