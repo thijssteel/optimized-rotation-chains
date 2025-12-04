@@ -1,9 +1,10 @@
-#include "drotc_params.h"
-#include "drotc_kernels.h"
-
 #include <immintrin.h>
 
-void drotc_kernel_mrxnxkr(int n, double * A, const double * C, int ldc, const double * S, int lds)
+#include "drotc_kernels.h"
+#include "drotc_params.h"
+
+void drotc_kernel_mrxnxkr(
+    int n, double* A, const double* C, int ldc, const double* S, int lds)
 {
     // Load initial values of A
     __m512d a_0_0 = _mm512_loadu_pd(A);
@@ -31,8 +32,7 @@ void drotc_kernel_mrxnxkr(int n, double * A, const double * C, int ldc, const do
     __m512d a_2_4 = _mm512_loadu_pd(&A[4 * MR + 16]);
     __m512d a_3_4 = _mm512_loadu_pd(&A[4 * MR + 24]);
 
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         __m512d temp, c_vec, s_vec;
 
         // Load new values of A
@@ -180,7 +180,7 @@ void drotc_kernel_mrxnxkr(int n, double * A, const double * C, int ldc, const do
     _mm512_storeu_pd(&A[4 * MR + 24], a_3_4);
 }
 
-void drotc_kernel_mrxnx1(int n, double * A, const double * C, const double * S)
+void drotc_kernel_mrxnx1(int n, double* A, const double* C, const double* S)
 {
     // Load initial values of A
     __m512d a_0_0 = _mm512_loadu_pd(A);
@@ -188,8 +188,7 @@ void drotc_kernel_mrxnx1(int n, double * A, const double * C, const double * S)
     __m512d a_2_0 = _mm512_loadu_pd(&A[16]);
     __m512d a_3_0 = _mm512_loadu_pd(&A[24]);
 
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         __m512d temp1, temp2, temp3, temp4, c_vec, s_vec;
 
         // Load new values of A
@@ -237,9 +236,10 @@ void drotc_kernel_mrxnx1(int n, double * A, const double * C, const double * S)
     _mm512_storeu_pd(&A[24], a_3_0);
 }
 
-void drotc_pack_A(int m, int n, const double * A, int lda, double * Ap){
-    for(int ib = 0; ib + MR - 1 < m; ib+=MR){
-        for(int j = 0; j < n; j++){
+void drotc_pack_A(int m, int n, const double* A, int lda, double* Ap)
+{
+    for (int ib = 0; ib + MR - 1 < m; ib += MR) {
+        for (int j = 0; j < n; j++) {
             __m512d a1 = _mm512_loadu_pd(&A[ib + j * lda]);
             __m512d a2 = _mm512_loadu_pd(&A[ib + j * lda + 8]);
             __m512d a3 = _mm512_loadu_pd(&A[ib + j * lda + 16]);
@@ -253,17 +253,17 @@ void drotc_pack_A(int m, int n, const double * A, int lda, double * Ap){
 
     int ib = m - m % MR;
     int m2 = m - ib;
-    for(int j = 0; j < n; j++){
-        for(int i = 0; i < m2; i++){
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < m2; i++) {
             Ap[ib * n + j * MR + i] = A[i + ib + j * lda];
         }
     }
-
 }
 
-void drotc_unpack_A(int m, int n, const double * Ap, double * A, int lda){
-    for(int ib = 0; ib + MR - 1 < m; ib+=MR){
-        for(int j = 0; j < n; j++){
+void drotc_unpack_A(int m, int n, const double* Ap, double* A, int lda)
+{
+    for (int ib = 0; ib + MR - 1 < m; ib += MR) {
+        for (int j = 0; j < n; j++) {
             __m512d a1 = _mm512_loadu_pd(&Ap[ib * n + j * MR]);
             __m512d a2 = _mm512_loadu_pd(&Ap[ib * n + j * MR + 8]);
             __m512d a3 = _mm512_loadu_pd(&Ap[ib * n + j * MR + 16]);
@@ -277,8 +277,8 @@ void drotc_unpack_A(int m, int n, const double * Ap, double * A, int lda){
 
     int ib = m - m % MR;
     int m2 = m - ib;
-    for(int j = 0; j < n; j++){
-        for(int i = 0; i < m2; i++){
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < m2; i++) {
             A[i + ib + j * lda] = Ap[ib * n + j * MR + i];
         }
     }

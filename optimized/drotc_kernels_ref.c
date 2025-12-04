@@ -1,11 +1,11 @@
-#include "drotc_params.h"
 #include "drotc_kernels.h"
+#include "drotc_params.h"
 
-void drotc_kernel_mrxnxkr(int n, double * A, const double * C, int ldc, const double * S, int lds)
+void drotc_kernel_mrxnxkr(
+    int n, double* A, const double* C, int ldc, const double* S, int lds)
 {
     // Note, both MR and KR are 1 in this case, which simplifies the kernel
-    for (int j = 0; j < n; j++)
-    {
+    for (int j = 0; j < n; j++) {
         double c = C[j];
         double s = S[j];
         double temp = c * A[j] + s * A[j + 1];
@@ -14,10 +14,9 @@ void drotc_kernel_mrxnxkr(int n, double * A, const double * C, int ldc, const do
     }
 }
 
-void drotc_kernel_mrxnx1(int n, double * A, const double * C, const double * S)
+void drotc_kernel_mrxnx1(int n, double* A, const double* C, const double* S)
 {
-    for (int j = 0; j < n; j++)
-    {
+    for (int j = 0; j < n; j++) {
         double c = C[j];
         double s = S[j];
         double temp = c * A[j] + s * A[j + 1];
@@ -26,23 +25,19 @@ void drotc_kernel_mrxnx1(int n, double * A, const double * C, const double * S)
     }
 }
 
-void drotc_pack_A(int m, int n, const double *A, int lda, double *Ap)
+void drotc_pack_A(int m, int n, const double* A, int lda, double* Ap)
 {
-    for (int j = 0; j < n; j++)
-    {
-        for (int i = 0; i < m; i++)
-        {
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < m; i++) {
             Ap[i * n + j] = A[i + j * lda];
         }
     }
 }
 
-void drotc_unpack_A(int m, int n, const double *Ap, double *A, int lda)
+void drotc_unpack_A(int m, int n, const double* Ap, double* A, int lda)
 {
-    for (int j = 0; j < n; j++)
-    {
-        for (int i = 0; i < m; i++)
-        {
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < m; i++) {
             A[i + j * lda] = Ap[i * n + j];
         }
     }

@@ -5,24 +5,24 @@
 #define KR 1
 
 #ifdef __AVX__
-#undef MR
-#undef KR
-#define MR 12
-#define KR 3
+    #undef MR
+    #undef KR
+    #define MR 12
+    #define KR 3
 #endif
 
 #ifdef __AVX2__
-#undef MR
-#undef KR
-#define MR 12
-#define KR 3
+    #undef MR
+    #undef KR
+    #define MR 12
+    #define KR 3
 #endif
 
 #ifdef __AVX512F__
-#undef MR
-#undef KR
-#define MR 32
-#define KR 5
+    #undef MR
+    #undef KR
+    #define MR 32
+    #define KR 5
 #endif
 
 #endif

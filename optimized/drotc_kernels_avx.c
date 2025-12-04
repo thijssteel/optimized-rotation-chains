@@ -1,12 +1,13 @@
-#include "drotc_params.h"
-#include "drotc_kernels.h"
-
 #include <immintrin.h>
+
+#include "drotc_kernels.h"
+#include "drotc_params.h"
 
 // Note, all of these kernels are written for MR = 12
 // If MR is changed, the kernels will need to be updated
 
-void drotc_kernel_mrxnxkr(int n, double * A, const double * C, int ldc, const double * S, int lds)
+void drotc_kernel_mrxnxkr(
+    int n, double* A, const double* C, int ldc, const double* S, int lds)
 {
     // Load initial values of A
     __m256d a_0_0 = _mm256_loadu_pd(A);
@@ -21,8 +22,7 @@ void drotc_kernel_mrxnxkr(int n, double * A, const double * C, int ldc, const do
     __m256d a_1_2 = _mm256_loadu_pd(&A[2 * MR + 4]);
     __m256d a_2_2 = _mm256_loadu_pd(&A[2 * MR + 8]);
 
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         __m256d temp, c_vec, s_vec;
 
         // Load new values of A
@@ -34,48 +34,66 @@ void drotc_kernel_mrxnxkr(int n, double * A, const double * C, int ldc, const do
         c_vec = _mm256_set1_pd(C[0]);
         s_vec = _mm256_set1_pd(S[0]);
 
-        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_0_2), _mm256_mul_pd(s_vec, a_0_next));
-        a_0_2 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_0_next), _mm256_mul_pd(s_vec, a_0_2));
+        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_0_2),
+                             _mm256_mul_pd(s_vec, a_0_next));
+        a_0_2 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_0_next),
+                              _mm256_mul_pd(s_vec, a_0_2));
         a_0_next = temp;
 
-        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_1_2), _mm256_mul_pd(s_vec, a_1_next));
-        a_1_2 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_1_next), _mm256_mul_pd(s_vec, a_1_2));
+        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_1_2),
+                             _mm256_mul_pd(s_vec, a_1_next));
+        a_1_2 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_1_next),
+                              _mm256_mul_pd(s_vec, a_1_2));
         a_1_next = temp;
 
-        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_2_2), _mm256_mul_pd(s_vec, a_2_next));
-        a_2_2 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_2_next), _mm256_mul_pd(s_vec, a_2_2));
+        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_2_2),
+                             _mm256_mul_pd(s_vec, a_2_next));
+        a_2_2 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_2_next),
+                              _mm256_mul_pd(s_vec, a_2_2));
         a_2_next = temp;
 
         // Apply rotation 1 to values 1 and 2 (next)
         c_vec = _mm256_set1_pd(C[ldc]);
         s_vec = _mm256_set1_pd(S[lds]);
 
-        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_0_1), _mm256_mul_pd(s_vec, a_0_next));
-        a_0_1 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_0_next), _mm256_mul_pd(s_vec, a_0_1));
+        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_0_1),
+                             _mm256_mul_pd(s_vec, a_0_next));
+        a_0_1 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_0_next),
+                              _mm256_mul_pd(s_vec, a_0_1));
         a_0_next = temp;
 
-        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_1_1), _mm256_mul_pd(s_vec, a_1_next));
-        a_1_1 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_1_next), _mm256_mul_pd(s_vec, a_1_1));
+        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_1_1),
+                             _mm256_mul_pd(s_vec, a_1_next));
+        a_1_1 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_1_next),
+                              _mm256_mul_pd(s_vec, a_1_1));
         a_1_next = temp;
 
-        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_2_1), _mm256_mul_pd(s_vec, a_2_next));
-        a_2_1 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_2_next), _mm256_mul_pd(s_vec, a_2_1));
+        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_2_1),
+                             _mm256_mul_pd(s_vec, a_2_next));
+        a_2_1 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_2_next),
+                              _mm256_mul_pd(s_vec, a_2_1));
         a_2_next = temp;
 
         // Apply rotation 2 to values 0 and 1 (next)
         c_vec = _mm256_set1_pd(C[2 * ldc]);
         s_vec = _mm256_set1_pd(S[2 * lds]);
 
-        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_0_0), _mm256_mul_pd(s_vec, a_0_next));
-        a_0_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_0_next), _mm256_mul_pd(s_vec, a_0_0));
+        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_0_0),
+                             _mm256_mul_pd(s_vec, a_0_next));
+        a_0_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_0_next),
+                              _mm256_mul_pd(s_vec, a_0_0));
         a_0_next = temp;
 
-        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_1_0), _mm256_mul_pd(s_vec, a_1_next));
-        a_1_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_1_next), _mm256_mul_pd(s_vec, a_1_0));
+        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_1_0),
+                             _mm256_mul_pd(s_vec, a_1_next));
+        a_1_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_1_next),
+                              _mm256_mul_pd(s_vec, a_1_0));
         a_1_next = temp;
 
-        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_2_0), _mm256_mul_pd(s_vec, a_2_next));
-        a_2_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_2_next), _mm256_mul_pd(s_vec, a_2_0));
+        temp = _mm256_add_pd(_mm256_mul_pd(c_vec, a_2_0),
+                             _mm256_mul_pd(s_vec, a_2_next));
+        a_2_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_2_next),
+                              _mm256_mul_pd(s_vec, a_2_0));
         a_2_next = temp;
 
         // Store value 0 (stored in next)
@@ -103,15 +121,14 @@ void drotc_kernel_mrxnxkr(int n, double * A, const double * C, int ldc, const do
     _mm256_storeu_pd(&A[2 * MR + 8], a_2_2);
 }
 
-void drotc_kernel_mrxnx1(int n, double * A, const double * C, const double * S)
+void drotc_kernel_mrxnx1(int n, double* A, const double* C, const double* S)
 {
     // Load initial values of A
     __m256d a_0_0 = _mm256_loadu_pd(A);
     __m256d a_1_0 = _mm256_loadu_pd(&A[4]);
     __m256d a_2_0 = _mm256_loadu_pd(&A[8]);
 
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         __m256d temp1, temp2, temp3, c_vec, s_vec;
 
         // Load new values of A
@@ -123,14 +140,20 @@ void drotc_kernel_mrxnx1(int n, double * A, const double * C, const double * S)
         c_vec = _mm256_set1_pd(C[0]);
         s_vec = _mm256_set1_pd(S[0]);
 
-        temp1 = _mm256_add_pd(_mm256_mul_pd(c_vec, a_0_0), _mm256_mul_pd(s_vec, a_0_next));
-        a_0_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_0_next), _mm256_mul_pd(s_vec, a_0_0));
+        temp1 = _mm256_add_pd(_mm256_mul_pd(c_vec, a_0_0),
+                              _mm256_mul_pd(s_vec, a_0_next));
+        a_0_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_0_next),
+                              _mm256_mul_pd(s_vec, a_0_0));
 
-        temp2 = _mm256_add_pd(_mm256_mul_pd(c_vec, a_1_0), _mm256_mul_pd(s_vec, a_1_next));
-        a_1_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_1_next), _mm256_mul_pd(s_vec, a_1_0));
+        temp2 = _mm256_add_pd(_mm256_mul_pd(c_vec, a_1_0),
+                              _mm256_mul_pd(s_vec, a_1_next));
+        a_1_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_1_next),
+                              _mm256_mul_pd(s_vec, a_1_0));
 
-        temp3 = _mm256_add_pd(_mm256_mul_pd(c_vec, a_2_0), _mm256_mul_pd(s_vec, a_2_next));
-        a_2_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_2_next), _mm256_mul_pd(s_vec, a_2_0));
+        temp3 = _mm256_add_pd(_mm256_mul_pd(c_vec, a_2_0),
+                              _mm256_mul_pd(s_vec, a_2_next));
+        a_2_0 = _mm256_sub_pd(_mm256_mul_pd(c_vec, a_2_next),
+                              _mm256_mul_pd(s_vec, a_2_0));
 
         // Store value 0
         _mm256_storeu_pd(&A[0], temp1);
@@ -149,10 +172,10 @@ void drotc_kernel_mrxnx1(int n, double * A, const double * C, const double * S)
     _mm256_storeu_pd(&A[8], a_2_0);
 }
 
-
-void drotc_pack_A(int m, int n, const double * A, int lda, double * Ap){
-    for(int ib = 0; ib + MR - 1 < m; ib+=MR){
-        for(int j = 0; j < n; j++){
+void drotc_pack_A(int m, int n, const double* A, int lda, double* Ap)
+{
+    for (int ib = 0; ib + MR - 1 < m; ib += MR) {
+        for (int j = 0; j < n; j++) {
             __m256d a1 = _mm256_loadu_pd(&A[ib + j * lda]);
             __m256d a2 = _mm256_loadu_pd(&A[ib + j * lda + 4]);
             __m256d a3 = _mm256_loadu_pd(&A[ib + j * lda + 8]);
@@ -164,17 +187,17 @@ void drotc_pack_A(int m, int n, const double * A, int lda, double * Ap){
 
     int ib = m - m % MR;
     int m2 = m - ib;
-    for(int j = 0; j < n; j++){
-        for(int i = 0; i < m2; i++){
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < m2; i++) {
             Ap[ib * n + j * MR + i] = A[i + ib + j * lda];
         }
     }
-
 }
 
-void drotc_unpack_A(int m, int n, const double * Ap, double * A, int lda){
-    for(int ib = 0; ib + MR - 1 < m; ib+=MR){
-        for(int j = 0; j < n; j++){
+void drotc_unpack_A(int m, int n, const double* Ap, double* A, int lda)
+{
+    for (int ib = 0; ib + MR - 1 < m; ib += MR) {
+        for (int j = 0; j < n; j++) {
             __m256d a1 = _mm256_loadu_pd(&Ap[ib * n + j * MR]);
             __m256d a2 = _mm256_loadu_pd(&Ap[ib * n + j * MR + 4]);
             __m256d a3 = _mm256_loadu_pd(&Ap[ib * n + j * MR + 8]);
@@ -186,8 +209,8 @@ void drotc_unpack_A(int m, int n, const double * Ap, double * A, int lda){
 
     int ib = m - m % MR;
     int m2 = m - ib;
-    for(int j = 0; j < n; j++){
-        for(int i = 0; i < m2; i++){
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < m2; i++) {
             A[i + ib + j * lda] = Ap[ib * n + j * MR + i];
         }
     }
