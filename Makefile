@@ -8,6 +8,26 @@ LAPACK_LIBS=-m64  -L${MKLROOT}/lib -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_seq
 
 test: test/test_kernels_ref test/test_kernels_avx test/test_kernels_avx2
 
+# Reference implementation
+
+reference/drotc.o: reference/drotc.f90
+	gfortran -c -o $@ $<
+
+reference/srotc.o: reference/srotc.f90
+	gfortran -c -o $@ $<
+
+reference/zrotc.o: reference/zrotc.f90
+	gfortran -c -o $@ $<
+
+reference/crotc.o: reference/crotc.f90
+	gfortran -c -o $@ $<
+
+reference/dzrotc.o: reference/dzrotc.f90
+	gfortran -c -o $@ $<
+
+reference/scrotc.o: reference/scrotc.f90
+	gfortran -c -o $@ $<
+
 # Actual implementation
 
 optimized/drotc_kernels_ref.o: optimized/drotc_kernels_ref.c optimized/drotc_kernels.h optimized/drotc_params.h

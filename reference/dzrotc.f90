@@ -67,6 +67,15 @@
 !>          of rotations is not applied.
 !> \endverbatim
 !>
+!> \param[in] trans
+!> \verbatim
+!>          trans is LOGICAL
+!>          If trans = .FALSE., the rotations are applied as given.
+!>          If trans = .TRUE., the conjugate transpose of the transformation is applied.
+!>          This means that the individual rotations are transposed, but also
+!>          that the order of the rotations in each sequence is reversed.
+!> \endverbatim
+!>
 !> \param[in] m
 !> \verbatim
 !>          m is INTEGER
@@ -137,15 +146,16 @@
 !
 !> \ingroup rotc
 !
-subroutine dzrotc(side, dir, startup, shutdown, m, n, k,&
-    A, lda, C, ldc, S, lds)
+subroutine dzrotc(side, dir, startup, shutdown, trans,&
+    m, n, k, A, lda, C, ldc, S, lds)
 !    .. Scalar Arguments ..
     integer, intent(in) :: m, n, k, lda, ldc, lds
     character, intent(in) :: dir, side
-    logical, intent(in) :: startup, shutdown
+    logical, intent(in) :: startup, shutdown, trans
 !    .. Array Arguments ..
     double complex, intent(inout) :: A(lda,*)
-    double precision, intent(in) :: C(ldc,*), S(lds,*)
+    double precision, intent(in) :: S(lds,*)
+    double precision, intent(in) :: C(ldc,*)
 !   .. Local Scalars ..
     integer i, j, l, j1, j2, incj, incj1, incj2, info
     double complex temp
@@ -226,30 +236,58 @@ subroutine dzrotc(side, dir, startup, shutdown, m, n, k,&
     end if
 
 !   Apply the rotations
-    if(side .eq. 'L') then
-        do l = 1, k
-            do j = j1+(l-1)*incj1, j2+(l-1)*incj2, incj
-                cs = C(j,l)
-                sn = S(j,l)
-                do i = 1, m
-                    temp = cs*A(i,j) + sn*A(i,j+1)
-                    A(i,j+1) = -sn*A(i,j) + cs*A(i,j+1)
-                    A(i,j) = temp
+    if(trans) then
+        if(side .eq. 'L') then
+            do l = k, 1, -1
+                do j = j2+(l-1)*incj2, j1+(l-1)*incj1, -incj
+                    cs = C(j,l)
+                    sn = S(j,l)
+                    do i = 1, m
+                        temp = cs*A(i,j) -sn*A(i,j+1)
+                        A(i,j+1) = sn*A(i,j) + cs*A(i,j+1)
+                        A(i,j) = temp
+                    end do
                 end do
             end do
-        end do
+        else
+            do l = k, 1, -1
+                do j = j2+(l-1)*incj2, j1+(l-1)*incj1, -incj
+                    cs = C(l,j)
+                    sn = S(l,j)
+                    do i = 1, m
+                        temp = cs*A(j,i) -sn*A(j+1,i)
+                        A(j+1,i) = sn*A(j,i) + cs*A(j+1,i)
+                        A(j,i) = temp
+                    end do
+                end do
+            end do
+        end if
     else
-        do l = 1, k
-            do j = j1+(l-1)*incj1, j2+(l-1)*incj2, incj
-                cs = C(l,j)
-                sn = S(l,j)
-                do i = 1, m
-                    temp = cs*A(j,i) + sn*A(j+1,i)
-                    A(j+1,i) = -sn*A(j,i) + cs*A(j+1,i)
-                    A(j,i) = temp
+        if(side .eq. 'L') then
+            do l = 1, k
+                do j = j1+(l-1)*incj1, j2+(l-1)*incj2, incj
+                    cs = C(j,l)
+                    sn = S(j,l)
+                    do i = 1, m
+                        temp = cs*A(i,j) + sn*A(i,j+1)
+                        A(i,j+1) = -sn*A(i,j) + cs*A(i,j+1)
+                        A(i,j) = temp
+                    end do
                 end do
             end do
-        end do
+        else
+            do l = 1, k
+                do j = j1+(l-1)*incj1, j2+(l-1)*incj2, incj
+                    cs = C(l,j)
+                    sn = S(l,j)
+                    do i = 1, m
+                        temp = cs*A(j,i) + sn*A(j+1,i)
+                        A(j+1,i) = -sn*A(j,i) + cs*A(j+1,i)
+                        A(j,i) = temp
+                    end do
+                end do
+            end do
+        end if
     end if
 
 end subroutine dzrotc
