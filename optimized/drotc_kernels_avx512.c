@@ -236,6 +236,251 @@ void drotc_kernel_mrxnx1(int n, double* A, const double* C, const double* S)
     _mm512_storeu_pd(&A[24], a_3_0);
 }
 
+void drotc_kernel_mrxnxkr_backward(
+    int n, double* A, const double* C, int ldc, const double* S, int lds)
+{
+    // Move pointers to the end
+    A += n * MR;
+    C += (n - 1);
+    S += (n - 1);
+
+    // Load initial values of A
+    __m512d a_0_1 = _mm512_loadu_pd(A);
+    __m512d a_1_1 = _mm512_loadu_pd(&A[8]);
+    __m512d a_2_1 = _mm512_loadu_pd(&A[16]);
+    __m512d a_3_1 = _mm512_loadu_pd(&A[24]);
+
+    __m512d a_0_2 = _mm512_loadu_pd(&A[MR]);
+    __m512d a_1_2 = _mm512_loadu_pd(&A[MR + 8]);
+    __m512d a_2_2 = _mm512_loadu_pd(&A[MR + 16]);
+    __m512d a_3_2 = _mm512_loadu_pd(&A[MR + 24]);
+
+    __m512d a_0_3 = _mm512_loadu_pd(&A[2 * MR]);
+    __m512d a_1_3 = _mm512_loadu_pd(&A[2 * MR + 8]);
+    __m512d a_2_3 = _mm512_loadu_pd(&A[2 * MR + 16]);
+    __m512d a_3_3 = _mm512_loadu_pd(&A[2 * MR + 24]);
+
+    __m512d a_0_4 = _mm512_loadu_pd(&A[3 * MR]);
+    __m512d a_1_4 = _mm512_loadu_pd(&A[3 * MR + 8]);
+    __m512d a_2_4 = _mm512_loadu_pd(&A[3 * MR + 16]);
+    __m512d a_3_4 = _mm512_loadu_pd(&A[3 * MR + 24]);
+
+    __m512d a_0_5 = _mm512_loadu_pd(&A[4 * MR]);
+    __m512d a_1_5 = _mm512_loadu_pd(&A[4 * MR + 8]);
+    __m512d a_2_5 = _mm512_loadu_pd(&A[4 * MR + 16]);
+    __m512d a_3_5 = _mm512_loadu_pd(&A[4 * MR + 24]);
+
+    for (int i = 0; i < n; i++) {
+        __m512d temp, c_vec, s_vec;
+
+        // Load new values of A
+        __m512d a_0_0 = _mm512_loadu_pd(&A[-MR]);
+        __m512d a_1_0 = _mm512_loadu_pd(&A[-MR + 8]);
+        __m512d a_2_0 = _mm512_loadu_pd(&A[-MR + 16]);
+        __m512d a_3_0 = _mm512_loadu_pd(&A[-MR + 24]);
+
+        // Apply rotation 0 to values 0 and 1
+        // Store result of value 0 in value 1 (will become 1 in next iteration)
+        // Store result of value 1 in value 0 (will be used for next rotation)
+        c_vec = _mm512_set1_pd(C[0]);
+        s_vec = _mm512_set1_pd(S[0]);
+
+        temp = _mm512_fmadd_pd(c_vec, a_0_0, _mm512_mul_pd(s_vec, a_0_1));
+        a_0_0 = _mm512_fnmadd_pd(s_vec, a_0_0, _mm512_mul_pd(c_vec, a_0_1));
+        a_0_1 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_1_0, _mm512_mul_pd(s_vec, a_1_1));
+        a_1_0 = _mm512_fnmadd_pd(s_vec, a_1_0, _mm512_mul_pd(c_vec, a_1_1));
+        a_1_1 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_2_0, _mm512_mul_pd(s_vec, a_2_1));
+        a_2_0 = _mm512_fnmadd_pd(s_vec, a_2_0, _mm512_mul_pd(c_vec, a_2_1));
+        a_2_1 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_3_0, _mm512_mul_pd(s_vec, a_3_1));
+        a_3_0 = _mm512_fnmadd_pd(s_vec, a_3_0, _mm512_mul_pd(c_vec, a_3_1));
+        a_3_1 = temp;
+
+        // Apply rotation 1 to values 1 (stored in value 0) and 2
+        c_vec = _mm512_set1_pd(C[ldc]);
+        s_vec = _mm512_set1_pd(S[lds]);
+
+        temp = _mm512_fmadd_pd(c_vec, a_0_0, _mm512_mul_pd(s_vec, a_0_2));
+        a_0_0 = _mm512_fnmadd_pd(s_vec, a_0_0, _mm512_mul_pd(c_vec, a_0_2));
+        a_0_2 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_1_0, _mm512_mul_pd(s_vec, a_1_2));
+        a_1_0 = _mm512_fnmadd_pd(s_vec, a_1_0, _mm512_mul_pd(c_vec, a_1_2));
+        a_1_2 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_2_0, _mm512_mul_pd(s_vec, a_2_2));
+        a_2_0 = _mm512_fnmadd_pd(s_vec, a_2_0, _mm512_mul_pd(c_vec, a_2_2));
+        a_2_2 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_3_0, _mm512_mul_pd(s_vec, a_3_2));
+        a_3_0 = _mm512_fnmadd_pd(s_vec, a_3_0, _mm512_mul_pd(c_vec, a_3_2));
+        a_3_2 = temp;
+
+        // Apply rotation 2 to values 2 (stored in value 0) and 3
+        c_vec = _mm512_set1_pd(C[2 * ldc]);
+        s_vec = _mm512_set1_pd(S[2 * lds]);
+
+        temp = _mm512_fmadd_pd(c_vec, a_0_0, _mm512_mul_pd(s_vec, a_0_3));
+        a_0_0 = _mm512_fnmadd_pd(s_vec, a_0_0, _mm512_mul_pd(c_vec, a_0_3));
+        a_0_3 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_1_0, _mm512_mul_pd(s_vec, a_1_3));
+        a_1_0 = _mm512_fnmadd_pd(s_vec, a_1_0, _mm512_mul_pd(c_vec, a_1_3));
+        a_1_3 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_2_0, _mm512_mul_pd(s_vec, a_2_3));
+        a_2_0 = _mm512_fnmadd_pd(s_vec, a_2_0, _mm512_mul_pd(c_vec, a_2_3));
+        a_2_3 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_3_0, _mm512_mul_pd(s_vec, a_3_3));
+        a_3_0 = _mm512_fnmadd_pd(s_vec, a_3_0, _mm512_mul_pd(c_vec, a_3_3));
+        a_3_3 = temp;
+
+        // Apply rotation 3 to values 3 (stored in value 0) and 4
+        c_vec = _mm512_set1_pd(C[3 * ldc]);
+        s_vec = _mm512_set1_pd(S[3 * lds]);
+
+        temp = _mm512_fmadd_pd(c_vec, a_0_0, _mm512_mul_pd(s_vec, a_0_4));
+        a_0_0 = _mm512_fnmadd_pd(s_vec, a_0_0, _mm512_mul_pd(c_vec, a_0_4));
+        a_0_4 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_1_0, _mm512_mul_pd(s_vec, a_1_4));
+        a_1_0 = _mm512_fnmadd_pd(s_vec, a_1_0, _mm512_mul_pd(c_vec, a_1_4));
+        a_1_4 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_2_0, _mm512_mul_pd(s_vec, a_2_4));
+        a_2_0 = _mm512_fnmadd_pd(s_vec, a_2_0, _mm512_mul_pd(c_vec, a_2_4));
+        a_2_4 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_3_0, _mm512_mul_pd(s_vec, a_3_4));
+        a_3_0 = _mm512_fnmadd_pd(s_vec, a_3_0, _mm512_mul_pd(c_vec, a_3_4));
+        a_3_4 = temp;
+
+        // Apply rotation 4 to values 4 (stored in value 0) and 5
+        c_vec = _mm512_set1_pd(C[4 * ldc]);
+        s_vec = _mm512_set1_pd(S[4 * lds]);
+
+        temp = _mm512_fmadd_pd(c_vec, a_0_0, _mm512_mul_pd(s_vec, a_0_5));
+        a_0_0 = _mm512_fnmadd_pd(s_vec, a_0_0, _mm512_mul_pd(c_vec, a_0_5));
+        a_0_5 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_1_0, _mm512_mul_pd(s_vec, a_1_5));
+        a_1_0 = _mm512_fnmadd_pd(s_vec, a_1_0, _mm512_mul_pd(c_vec, a_1_5));
+        a_1_5 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_2_0, _mm512_mul_pd(s_vec, a_2_5));
+        a_2_0 = _mm512_fnmadd_pd(s_vec, a_2_0, _mm512_mul_pd(c_vec, a_2_5));
+        a_2_5 = temp;
+
+        temp = _mm512_fmadd_pd(c_vec, a_3_0, _mm512_mul_pd(s_vec, a_3_5));
+        a_3_0 = _mm512_fnmadd_pd(s_vec, a_3_0, _mm512_mul_pd(c_vec, a_3_5));
+        a_3_5 = temp;
+
+        // Store value 5 (stored in value 0)
+        _mm512_storeu_pd(&A[4 * MR + 0], a_0_0);
+        _mm512_storeu_pd(&A[4 * MR + 8], a_1_0);
+        _mm512_storeu_pd(&A[4 * MR + 16], a_2_0);
+        _mm512_storeu_pd(&A[4 * MR + 24], a_3_0);
+
+        // Increment pointers
+        A -= MR;
+        C--;
+        S--;
+    }
+
+    // Store final values of A
+    _mm512_storeu_pd(&A[0], a_0_1);
+    _mm512_storeu_pd(&A[8], a_1_1);
+    _mm512_storeu_pd(&A[16], a_2_1);
+    _mm512_storeu_pd(&A[24], a_3_1);
+
+    _mm512_storeu_pd(&A[MR + 0], a_0_2);
+    _mm512_storeu_pd(&A[MR + 8], a_1_2);
+    _mm512_storeu_pd(&A[MR + 16], a_2_2);
+    _mm512_storeu_pd(&A[MR + 24], a_3_2);
+
+    _mm512_storeu_pd(&A[2 * MR + 0], a_0_3);
+    _mm512_storeu_pd(&A[2 * MR + 8], a_1_3);
+    _mm512_storeu_pd(&A[2 * MR + 16], a_2_3);
+    _mm512_storeu_pd(&A[2 * MR + 24], a_3_3);
+
+    _mm512_storeu_pd(&A[3 * MR + 0], a_0_4);
+    _mm512_storeu_pd(&A[3 * MR + 8], a_1_4);
+    _mm512_storeu_pd(&A[3 * MR + 16], a_2_4);
+    _mm512_storeu_pd(&A[3 * MR + 24], a_3_4);
+
+    _mm512_storeu_pd(&A[4 * MR + 0], a_0_5);
+    _mm512_storeu_pd(&A[4 * MR + 8], a_1_5);
+    _mm512_storeu_pd(&A[4 * MR + 16], a_2_5);
+    _mm512_storeu_pd(&A[4 * MR + 24], a_3_5);
+}
+
+void drotc_kernel_mrxnx1_backward(int n,
+                                  double* A,
+                                  const double* C,
+                                  const double* S)
+{
+    // Move pointers to the end
+    A += n * MR;
+    C += n - 1;
+    S += n - 1;
+
+    // Load initial values of A
+    __m512d a_0_0 = _mm512_loadu_pd(&A[0]);
+    __m512d a_1_0 = _mm512_loadu_pd(&A[8]);
+    __m512d a_2_0 = _mm512_loadu_pd(&A[16]);
+    __m512d a_3_0 = _mm512_loadu_pd(&A[24]);
+
+    for (int i = 0; i < n; i++) {
+        __m512d temp1, temp2, temp3, temp4, c_vec, s_vec;
+
+        // Load new values of A
+        __m512d a_0_next = _mm512_loadu_pd(&A[-MR]);
+        __m512d a_1_next = _mm512_loadu_pd(&A[-MR + 8]);
+        __m512d a_2_next = _mm512_loadu_pd(&A[-MR + 16]);
+        __m512d a_3_next = _mm512_loadu_pd(&A[-MR + 24]);
+
+        // Apply rotation 0 to values 0 and 1 (next)
+        c_vec = _mm512_set1_pd(C[0]);
+        s_vec = _mm512_set1_pd(S[0]);
+
+        temp1 = _mm512_fnmadd_pd(s_vec, a_0_next, _mm512_mul_pd(c_vec, a_0_0));
+        a_0_0 = _mm512_fmadd_pd(c_vec, a_0_next, _mm512_mul_pd(s_vec, a_0_0));
+
+        temp2 = _mm512_fnmadd_pd(s_vec, a_1_next, _mm512_mul_pd(c_vec, a_1_0));
+        a_1_0 = _mm512_fmadd_pd(c_vec, a_1_next, _mm512_mul_pd(s_vec, a_1_0));
+
+        temp3 = _mm512_fnmadd_pd(s_vec, a_2_next, _mm512_mul_pd(c_vec, a_2_0));
+        a_2_0 = _mm512_fmadd_pd(c_vec, a_2_next, _mm512_mul_pd(s_vec, a_2_0));
+
+        temp4 = _mm512_fnmadd_pd(s_vec, a_3_next, _mm512_mul_pd(c_vec, a_3_0));
+        a_3_0 = _mm512_fmadd_pd(c_vec, a_3_next, _mm512_mul_pd(s_vec, a_3_0));
+
+        // Store value 0
+        _mm512_storeu_pd(&A[0], temp1);
+        _mm512_storeu_pd(&A[8], temp2);
+        _mm512_storeu_pd(&A[16], temp3);
+        _mm512_storeu_pd(&A[24], temp4);
+
+        // Increment pointers
+        A -= MR;
+        C--;
+        S--;
+    }
+
+    // Store final values of A
+    _mm512_storeu_pd(&A[0], a_0_0);
+    _mm512_storeu_pd(&A[8], a_1_0);
+    _mm512_storeu_pd(&A[16], a_2_0);
+    _mm512_storeu_pd(&A[24], a_3_0);
+}
+
+
 void drotc_pack_A(int m, int n, const double* A, int lda, double* Ap)
 {
     for (int ib = 0; ib + MR - 1 < m; ib += MR) {
