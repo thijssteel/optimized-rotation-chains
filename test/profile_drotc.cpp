@@ -55,7 +55,7 @@ void profile_rotc(int m,
         std::copy(A_copy, A_copy + m * (n + 1), A);
         auto start = std::chrono::high_resolution_clock::now();
         for (int j = 0; j < n_repeat; j++) {
-            rotc('R', 'F', false, false, m, n, k, A, m, C, n, S, n);
+            rotc('R', 'F', false, false, false, m, n, k, A, m, C, n, S, n);
         }
         auto end = std::chrono::high_resolution_clock::now();
         double timing =
@@ -126,7 +126,7 @@ void profile_rotc_prepack(int m,
         std::copy(Ap_copy, Ap_copy + mp * (n + 1), Ap);
         auto start = std::chrono::high_resolution_clock::now();
         for (int j = 0; j < n_repeat; j++) {
-            rotc_prepacked('R', 'F', false, false, mp, n, k, Ap, n + 1, C, n, S,
+            rotc_prepacked('R', 'F', false, false, false, mp, n, k, Ap, n + 1, C, n, S,
                            n);
         }
         auto end = std::chrono::high_resolution_clock::now();
